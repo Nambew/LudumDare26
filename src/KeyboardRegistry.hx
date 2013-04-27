@@ -1,6 +1,7 @@
 package ;
 import flash.display.DisplayObject;
 import flash.events.KeyboardEvent;
+import flash.ui.Keyboard;
 import haxe.ds.IntMap;
 
 /**
@@ -12,6 +13,7 @@ class KeyboardRegistry
 	private var _pressKeys:IntMap<Bool>;
 	private var _target:DisplayObject;
 	private var _activate:Bool;
+
 	
 	public function new( target:DisplayObject ) 
 	{
@@ -26,6 +28,15 @@ class KeyboardRegistry
 	
 	public function isUp( code:Int ):Bool {
 		return !_pressKeys.exists( code );
+	}
+	
+	public function isToggle( code:Int ):Bool {
+		var r:Bool = isDown( code ) && _pressKeys.get( code );
+		
+		if( r )
+			_pressKeys.set( code, false );
+		
+		return r;
 	}
 	
 	public function activate():Void {
@@ -45,6 +56,7 @@ class KeyboardRegistry
 	}
 	
 	private function onKeyDown( e:KeyboardEvent ):Void {
+		trace( e.keyCode + " ::" + String.fromCharCode( e.keyCode ) );
 		_pressKeys.set( e.keyCode, true );
 	}
 	
