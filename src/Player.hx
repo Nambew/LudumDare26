@@ -11,7 +11,6 @@ class Player implements PhysicEntity
 {
 
 	private var _position:IntPoint;
-	private var _projectedPosition:IntPoint;
 	private var _isGrounded:Bool;
 	private var _isJumping:Bool;
 	
@@ -21,6 +20,7 @@ class Player implements PhysicEntity
 	private var _border:BitmapData;
 	private var _dim:Rectangle;
 	
+	private var _xSpeed:Float = 0;
 	private var _ySpeed:Float = 0;
 	private var _jumpSpeed:Float = 6;
 	
@@ -67,6 +67,10 @@ class Player implements PhysicEntity
 		return _isGrounded;
 	}
 	
+	public function isFalling():Bool {
+		return !_isGrounded;
+	}
+	
 	public function isJumping():Bool {
 		return _isJumping;
 	}
@@ -74,11 +78,13 @@ class Player implements PhysicEntity
 	public function jump():Void {
 		_isJumping = true;
 		_ySpeed = -_jumpSpeed;
+		trace( "JUMP" );
 	}
 	
 	public function grounded():Void {
 		_isGrounded = true;
 		_isJumping = false;
+		_ySpeed = 0;
 	}
 	
 	public function fall():Void {
@@ -99,11 +105,11 @@ class Player implements PhysicEntity
 	}
 	
 	public function moveLeft( x:UInt ):Void {
-		_projectedPosition.x -= x;
+		_position.x -= x;
 	}
 	
 	public function moveRight( x:UInt ):Void {
-		_projectedPosition.x += x;
+		_position.x += x;
 	}
 	
 	public function addRed():Void {
@@ -173,16 +179,6 @@ class Player implements PhysicEntity
 	public function setPosition( x:Int, y:Int ):Void {
 		_position.x = x;
 		_position.y = y;
-	}
-	
-	public function getProjectedPosition():IntPoint {
-		return _projectedPosition;
-	}
-	
-	public function setProjectedPosition( x:Int, y:Int ):Void {
-		_projectedPosition.x = x;
-		_projectedPosition.y = y;
-		
 	}
 	
 	
@@ -255,5 +251,13 @@ class Player implements PhysicEntity
 	
 	public function setYSpeed( v:Float ):Void {
 		_ySpeed = v;
+	}
+	
+	public function getXSpeed():Float {
+		return _xSpeed;
+	}
+	
+	public function setXSpeed( v:Float ):Void {
+		_xSpeed = v;
 	}
 }

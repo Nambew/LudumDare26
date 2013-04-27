@@ -98,7 +98,7 @@ class Scene extends Bitmap
 		var localX:Int;
 		var floorColor:UInt = 0;
 		
-		for ( x in 0...1 ) {
+		for ( x in 0...2 ) {
 			localX = posX + ( x * maxX );
 			for ( y in 0...maxY ) {
 				color = _background.getPixel( localX, posY + y );
@@ -109,6 +109,38 @@ class Scene extends Bitmap
 		}
 		
 		return false;
+	}
+	
+	public function getFloorDistance( point:IntPoint ):Int {
+		var upDist:Int = 0;
+		var downDist:Int = 0;
+		var isFloorUp:Bool = true;
+		var isFloorDown:Bool = true;
+		var color:UInt;
+		
+		for ( y in 0...5 ) {
+			color = _background.getPixel( point.x, point.y - y - 1 );
+			if ( isFloorUp && color == 0 ) {
+				upDist++;
+			} else {
+				isFloorUp = false;
+			}
+			
+			color = _background.getPixel( point.x, point.y + y );
+			
+			if ( color == 0 ) {
+				isFloorDown = false;
+			} else if( isFloorDown ) {
+				downDist++;
+			}
+		}
+		
+		if ( upDist > 0 )
+			return -upDist;
+		else {
+			return downDist;
+		}
+
 	}
 	
 	

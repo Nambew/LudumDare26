@@ -36,7 +36,7 @@ class Game
 	private var _textColor:TextField;
 	private var _stage:Stage;
 	
-	private var _gravity:Float = 2.5;
+	private var _gravity:Float = 0.5;
 	private var _physicEntites:Array<PhysicEntity>;
 	
 	public function new() 
@@ -90,6 +90,10 @@ class Game
 			_player.moveRight( 3 );
 		}
 		
+		if ( !_player.isJumping() && _key.isDown( Keyboard.UP ) ) {
+			_player.jump();
+		}
+		
 		if ( _key.isToggle( Keyboard.A ) ) {
 			
 			_player.addRed();
@@ -134,25 +138,46 @@ class Game
 		var currentPosition:IntPoint;
 		
 		for ( entity in _physicEntites ) {
+			pos = entity.getPosition();
+			bound = entity.getBound();
 			
 			if ( entity.isGravitable() ) {
-				pos = entity.getPosition();
-				bound = entity.getBound();
+				
+				
 				checkRegion.x = pos.x;
 				checkRegion.y = pos.y;
 				checkRegion.width = bound.width;
 				
-				if( _scene.isFloor( checkRegion ) ) {
-					entity.grounded();
-				} else {
+				if ( _scene.isFloor( checkRegion ) ) {
+					trace( "FLOOR" );
+					if( entity.isFalling() ) {
+						entity.grounded();
+					}
+				} else if( entity.isGrounded() ) {
 					entity.fall();
-					
+				}
 				
-					
-					
+				if ( entity.isFalling() || entity.isJumping() ) {
+					entity.setYSpeed( entity.getYSpeed() + _gravity );
 				}
 				
 			}
+			
+			// check collision
+			var leftFoot:Int = _scene.getFloorDistance( pos );
+			var rightFoot:Int = _scene.getFloorDistance( new IntPoint( pos.x + Math.round( bound.width ), pos.y ) );
+			
+			entity.setPosition( pos.x, pos.y + Math.round( entity.getYSpeed() ) );
+			
+			trace( leftFoot + " :: " + rightFoot );
+			
+			var smallest:Int = Math.round( Math.min( leftFoot, rightFoot ) );
+			
+			if ( smallest < 0 ) {
+				entity.setPosition( pos.x, entity.getPosition().y + smallest );
+			}
+			
+			
 		}
 	}
 	

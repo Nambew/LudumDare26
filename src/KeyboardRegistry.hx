@@ -56,7 +56,6 @@ class KeyboardRegistry
 	}
 	
 	private function onKeyDown( e:KeyboardEvent ):Void {
-		trace( e.keyCode + " ::" + String.fromCharCode( e.keyCode ) );
 		_pressKeys.set( e.keyCode, true );
 	}
 	
