@@ -34,10 +34,13 @@ class Game
 	private var _player:Player;
 	
 	private var _textColor:TextField;
+	private var _textFPS:TextField;
 	private var _stage:Stage;
 	
 	private var _gravity:Float = 0.5;
 	private var _physicEntites:Array<PhysicEntity>;
+	private var _ftpsTime:Int;
+	private var _frameCount:Int = 0;
 	
 	public function new() 
 	{
@@ -62,12 +65,25 @@ class Game
 		
 		_textColor = new TextField();
 		_textColor.textColor = 0;
+		_textColor.border = true;
 		_textColor.x = _stage.width - 100;
-		_textColor.y = _stage.height - 50;
+		_textColor.y = _stage.height - 70;
+		_textColor.height = 20;
+		_textColor.width = 100;
 		_textColor.text = "Color:";
 		
 		_stage.addChild( _textColor );
 		
+		_textFPS = new TextField();
+		_textFPS.textColor = 0;
+		_textFPS.border = true;
+		_textFPS.height = 20;
+		_textFPS.width = 100;
+		_textFPS.x = _stage.width - 100;
+		_textFPS.y = _stage.height - 30;
+		_textFPS.text = "FPS:";
+		
+		_stage.addChild( _textFPS );
 	}
 	
 	private function isPlayerStealth():Bool {
@@ -75,6 +91,8 @@ class Game
 	}
 	
 	public function start():Void {
+		_ftpsTime = flash.Lib.getTimer();
+		_frameCount = 0;
 		_key.activate();
 	}
 	
@@ -84,10 +102,18 @@ class Game
 	
 	private function gameLoop( e:Event ):Void {
 		
+		_player.stop();
+		
 		if ( _key.isDown( Keyboard.LEFT ) ) {
-			_player.moveLeft( 3 );
+			_player.moveLeft( 1 );
+			_player.walk();
 		} else if ( _key.isDown( Keyboard.RIGHT ) ) {
-			_player.moveRight( 3 );
+			_player.moveRight( 1 );
+			_player.walk();
+		}
+		
+		if ( !_player.isWalking() ) {
+			_player.setXSpeed( 0 );
 		}
 		
 		if ( !_player.isJumping() && _key.isDown( Keyboard.UP ) ) {
@@ -119,12 +145,23 @@ class Game
 			updateText();
 		}
 		
+		if ( isPlayerStealth() ) {
+			
+		}
+		
 		resolvePhysic();
 		
 		_scene.refresh();
 		
-		if ( isPlayerStealth() ) {
-			
+		
+		
+		var currentTime:Float = ( Lib.getTimer() - _ftpsTime ) / 1000;
+		_frameCount++;
+		
+		if( currentTime > 1. ) {
+			_textFPS.text = "FPS:" + ( _frameCount / currentTime );
+			_frameCount = 0;
+			_ftpsTime = Lib.getTimer();
 		}
 		
 	}
@@ -149,7 +186,6 @@ class Game
 				checkRegion.width = bound.width;
 				
 				if ( _scene.isFloor( checkRegion ) ) {
-					trace( "FLOOR" );
 					if( entity.isFalling() ) {
 						entity.grounded();
 					}
@@ -163,21 +199,72 @@ class Game
 				
 			}
 			
-			// check collision
+			resolveCollision( entity );
+			
+		}
+	}
+	
+	private function resolveCollision( entity:PhysicEntity ):Void {
+		var pos:IntPoint = entity.getPosition();
+		var bound:Rectangle = entity.getBound();
+		var moveVector:IntPoint = new IntPoint( Math.floor( entity.getXSpeed() ),  Math.floor( entity.getYSpeed() ) );
+		
+		//bottom collision
+		if( moveVector.y > 0 ) {
 			var leftFoot:Int = _scene.getFloorDistance( pos );
 			var rightFoot:Int = _scene.getFloorDistance( new IntPoint( pos.x + Math.round( bound.width ), pos.y ) );
 			
-			entity.setPosition( pos.x, pos.y + Math.round( entity.getYSpeed() ) );
-			
-			trace( leftFoot + " :: " + rightFoot );
+			//entity.setPosition( pos.x + Math.round( entity.getXSpeed() ), pos.y + Math.round( entity.getYSpeed() ) );
 			
 			var smallest:Int = Math.round( Math.min( leftFoot, rightFoot ) );
 			
 			if ( smallest < 0 ) {
-				entity.setPosition( pos.x, entity.getPosition().y + smallest );
+				//entity.setPosition( pos.x, entity.getPosition().y + smallest );
+			}
+		// up collision
+		} else if ( moveVector.y < 0 ) {
+			
+		}
+		
+		if ( moveVector.x < 0 ) {
+			var top:Int = pos.y - Math.floor( bound.height );
+			var bottom:Int = pos.y;
+			var topDist:Int = moveVector.x;
+			var bottomDist:Int = moveVector.x;
+			
+			while ( _scene.isCollision( pos.x + bottomDist, bottom ) && bottomDist < 0 ) {
+				bottomDist++;
+				entity.setXSpeed( 0 );
 			}
 			
+			while ( _scene.isCollision( pos.x + topDist, top ) && topDist < 0 ) {
+				topDist++;
+				entity.setXSpeed( 0 );
+			}
 			
+			moveVector.x = Math.round( Math.max( bottomDist, topDist ) );
+			
+			entity.setPosition( pos.x + moveVector.x, pos.y );
+		} else if ( moveVector.x > 0 ) {
+			var top:Int = pos.y - Math.floor( bound.height );
+			var width:Int = Math.floor( bound.width ) - 1;
+			var bottom:Int = pos.y;
+			var topDist:Int = moveVector.x;
+			var bottomDist:Int = moveVector.x;
+			
+			while ( _scene.isCollision( pos.x + width + bottomDist, bottom ) && bottomDist > 0 ) {
+				bottomDist--;
+				entity.setXSpeed( 0 );
+			}
+			
+			while ( _scene.isCollision( pos.x + width + topDist, top ) && topDist > 0 ) {
+				topDist--;
+				entity.setXSpeed( 0 );
+			}
+			
+			moveVector.x = Math.round( Math.min( bottomDist, topDist ) );
+			
+			entity.setPosition( pos.x + moveVector.x, pos.y );
 		}
 	}
 	

@@ -13,6 +13,7 @@ class Player implements PhysicEntity
 	private var _position:IntPoint;
 	private var _isGrounded:Bool;
 	private var _isJumping:Bool;
+	private var _walking:Bool;
 	
 	private var _color:UInt;
 	
@@ -20,6 +21,7 @@ class Player implements PhysicEntity
 	private var _border:BitmapData;
 	private var _dim:Rectangle;
 	
+	private var _maxSpeed:Float = 3;
 	private var _xSpeed:Float = 0;
 	private var _ySpeed:Float = 0;
 	private var _jumpSpeed:Float = 6;
@@ -75,6 +77,18 @@ class Player implements PhysicEntity
 		return _isJumping;
 	}
 	
+	public function isWalking():Bool {
+		return _walking;
+	}
+	
+	public function walk():Void {
+		_walking = true;
+	}
+	
+	public function stop():Void {
+		_walking = false;
+	}
+	
 	public function jump():Void {
 		_isJumping = true;
 		_ySpeed = -_jumpSpeed;
@@ -105,11 +119,12 @@ class Player implements PhysicEntity
 	}
 	
 	public function moveLeft( x:UInt ):Void {
-		_position.x -= x;
+		trace( getXSpeed() + " - " + x );
+		setXSpeed( getXSpeed() - x );
 	}
 	
 	public function moveRight( x:UInt ):Void {
-		_position.x += x;
+		setXSpeed( getXSpeed() + x );
 	}
 	
 	public function addRed():Void {
@@ -259,5 +274,7 @@ class Player implements PhysicEntity
 	
 	public function setXSpeed( v:Float ):Void {
 		_xSpeed = v;
+		if ( v < 0 && _xSpeed < -_maxSpeed ) _xSpeed = -_maxSpeed;
+		else if ( v > 0 && _xSpeed > _maxSpeed ) _xSpeed = _maxSpeed;
 	}
 }

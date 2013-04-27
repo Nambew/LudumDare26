@@ -12,6 +12,7 @@ import flash.utils.ByteArray;
  
 class Scene extends Bitmap
 {
+	private var _floorColor:UInt = 0;
 	
 	private var _background:BitmapData;
 	private var _dimensions:IntPoint;
@@ -96,19 +97,22 @@ class Scene extends Bitmap
 		var posY:Int = Math.floor(rect.y);
 		var color:UInt;
 		var localX:Int;
-		var floorColor:UInt = 0;
 		
 		for ( x in 0...2 ) {
 			localX = posX + ( x * maxX );
 			for ( y in 0...maxY ) {
 				color = _background.getPixel( localX, posY + y );
-				if ( color == floorColor ) {
+				if ( color == _floorColor ) {
 					return true;
 				}
 			}
 		}
 		
 		return false;
+	}
+	
+	public function isCollision( x:Int, y:Int ):Bool {
+		return _background.getPixel( x, y ) == _floorColor;
 	}
 	
 	public function getFloorDistance( point:IntPoint ):Int {
@@ -120,7 +124,7 @@ class Scene extends Bitmap
 		
 		for ( y in 0...5 ) {
 			color = _background.getPixel( point.x, point.y - y - 1 );
-			if ( isFloorUp && color == 0 ) {
+			if ( isFloorUp && color == _floorColor ) {
 				upDist++;
 			} else {
 				isFloorUp = false;
@@ -128,7 +132,7 @@ class Scene extends Bitmap
 			
 			color = _background.getPixel( point.x, point.y + y );
 			
-			if ( color == 0 ) {
+			if ( color == _floorColor ) {
 				isFloorDown = false;
 			} else if( isFloorDown ) {
 				downDist++;

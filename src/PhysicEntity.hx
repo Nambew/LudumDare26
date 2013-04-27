@@ -21,6 +21,8 @@ interface PhysicEntity
 	public function setYSpeed( v:Float ):Void;
 	public function getXSpeed():Float;
 	public function setXSpeed( v:Float ):Void;
-	
+	public function isWalking():Bool;
+	public function walk():Void;
+	public function stop():Void;
 	
 }
