@@ -50,7 +50,7 @@ class Game
 		
 		_pos = new Point( 0, 0 );
 		_player = new Player();
-		_player.setPosition( 20, 140 );
+		_player.setPosition( 20, 120 );
 		
 		_scene = new Scene( 600, 400 );
 		_scene.setBackground( new BgLevel1( 0, 0 ) );
@@ -211,16 +211,23 @@ class Game
 		
 		//bottom collision
 		if( moveVector.y > 0 ) {
-			var leftFoot:Int = _scene.getFloorDistance( pos );
-			var rightFoot:Int = _scene.getFloorDistance( new IntPoint( pos.x + Math.round( bound.width ), pos.y ) );
+			var leftFoot:Int = pos.x;
+			var rightFoot:Int = pos.x + Math.ceil( bound.width ) - 3;
+			var leftDist:Int = moveVector.y;
+			var rightDist:Int = moveVector.y;
 			
-			//entity.setPosition( pos.x + Math.round( entity.getXSpeed() ), pos.y + Math.round( entity.getYSpeed() ) );
-			
-			var smallest:Int = Math.round( Math.min( leftFoot, rightFoot ) );
-			
-			if ( smallest < 0 ) {
-				//entity.setPosition( pos.x, entity.getPosition().y + smallest );
+			while ( _scene.isCollision( leftFoot, pos.y + leftDist ) && leftDist > 0 ) {
+				leftDist--;
+				entity.grounded();
 			}
+			
+			while ( _scene.isCollision( rightFoot, pos.y + rightDist ) && rightDist > 0 ) {
+				rightDist--;
+				entity.grounded();
+			}
+			
+			moveVector.y = Math.round( Math.min( leftDist, rightDist ) );
+			
 		// up collision
 		} else if ( moveVector.y < 0 ) {
 			
@@ -243,8 +250,6 @@ class Game
 			}
 			
 			moveVector.x = Math.round( Math.max( bottomDist, topDist ) );
-			
-			entity.setPosition( pos.x + moveVector.x, pos.y );
 		} else if ( moveVector.x > 0 ) {
 			var top:Int = pos.y - Math.floor( bound.height );
 			var width:Int = Math.floor( bound.width ) - 1;
@@ -263,9 +268,9 @@ class Game
 			}
 			
 			moveVector.x = Math.round( Math.min( bottomDist, topDist ) );
-			
-			entity.setPosition( pos.x + moveVector.x, pos.y );
 		}
+		
+		entity.setPosition( pos.x + moveVector.x, pos.y + moveVector.y );
 	}
 	
 }

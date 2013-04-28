@@ -91,7 +91,7 @@ class Scene extends Bitmap
 	}
 	
 	public function isFloor( rect:Rectangle ):Bool {
-		var maxX:Int = Math.floor(rect.width);
+		var maxX:Int = Math.floor(rect.width) - 1;
 		var maxY:Int = Math.floor(rect.height);
 		var posX:Int = Math.floor(rect.x);
 		var posY:Int = Math.floor(rect.y);

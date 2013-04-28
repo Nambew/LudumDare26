@@ -119,7 +119,6 @@ class Player implements PhysicEntity
 	}
 	
 	public function moveLeft( x:UInt ):Void {
-		trace( getXSpeed() + " - " + x );
 		setXSpeed( getXSpeed() - x );
 	}
 	
