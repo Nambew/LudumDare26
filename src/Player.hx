@@ -22,7 +22,7 @@ class Player implements PhysicEntity
 	private var _maxSpeed:Float = 3;
 	private var _xSpeed:Float = 0;
 	private var _ySpeed:Float = 0;
-	private var _jumpSpeed:Float = 6;
+	private var _jumpSpeed:Float = 8;
 	
 	private var _colorIndex:Int = 12;
 	private var _colors:Array<UInt>;
@@ -31,7 +31,7 @@ class Player implements PhysicEntity
 	{
 		grounded();
 		
-		_dim = new Rectangle(0, 0, 16, 32 );
+		_dim = new Rectangle(0, 0, 16, 26 );
 		_position = new IntPoint( 0, 0 );
 		
 		_colors = new Array<UInt>();
@@ -130,7 +130,6 @@ class Player implements PhysicEntity
 	public function jump():Void {
 		_isJumping = true;
 		_ySpeed = -_jumpSpeed;
-		trace( "JUMP" );
 	}
 	
 	public function grounded():Void {
@@ -213,5 +212,9 @@ class Player implements PhysicEntity
 		_xSpeed = v;
 		if ( v < 0 && _xSpeed < -_maxSpeed ) _xSpeed = -_maxSpeed;
 		else if ( v > 0 && _xSpeed > _maxSpeed ) _xSpeed = _maxSpeed;
+	}
+	
+	public function setCollision( v:IntPoint ):Void {
+		
 	}
 }

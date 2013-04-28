@@ -32,6 +32,7 @@ class Game
 	
 	private var _scene:Scene;
 	private var _player:Player;
+	private var _ennemies:Array<Ennemy>;
 	
 	private var _textColor:TextField;
 	private var _textFPS:TextField;
@@ -42,6 +43,7 @@ class Game
 	private var _physicEntites:Array<PhysicEntity>;
 	private var _ftpsTime:Int;
 	private var _frameCount:Int = 0;
+	private var _stealthMode:Bool = false;
 	
 	public function new() 
 	{
@@ -53,12 +55,20 @@ class Game
 		_player = new Player();
 		_player.setPosition( 20, 120 );
 		
+		_ennemies = new Array<Ennemy>();
+		
+		_ennemies.push( new Ennemy( new IntPoint( 464, 111 ), _scene, new IntPoint( 20 * 16, 9 * 16 ) ) );
+		
 		_scene = new Scene( 600, 400 );
 		_scene.setBackground( new BgLevel1( 0, 0 ) );
 		_scene.setPlayer( _player );
 		
+		_scene.addEnemy( _ennemies[ 0 ] );
+		
 		_physicEntites = new Array<PhysicEntity>();
 		_physicEntites.push( _player );
+		_physicEntites.push( _ennemies[ 0 ] );
+		
 		
 		_stage = Lib.current.stage;
 		
@@ -143,20 +153,18 @@ class Game
 			updateText();
 		}
 		
-		if ( isPlayerStealth() ) {
-			
-			
-			
+		_stealthMode = isPlayerStealth();
+		if ( _stealthMode ) {	
 			_textStealth.text = "Stealth: YES"; 
 		} else {
 			_textStealth.text = "Stealth: NO"; 
 		}
 		
+		resolveIA();
+		
 		resolvePhysic();
 		
 		_scene.refresh();
-		
-		
 		
 		var currentTime:Float = ( Lib.getTimer() - _ftpsTime ) / 1000;
 		_frameCount++;
@@ -167,6 +175,14 @@ class Game
 			_ftpsTime = Lib.getTimer();
 		}
 		
+	}
+	
+	private function resolveIA():Void {
+		for ( ennemy in _ennemies ) {
+			if ( ennemy.isActive() ) {
+				ennemy.ia( _stealthMode, _player.getPosition() );
+			}
+		}
 	}
 	
 	private function resolvePhysic():Void {
@@ -202,15 +218,16 @@ class Game
 				
 			}
 			
-			resolveCollision( entity );
+			entity.setCollision( resolveCollision( entity ) );
 			
 		}
 	}
 	
-	private function resolveCollision( entity:PhysicEntity ):Void {
+	private function resolveCollision( entity:PhysicEntity ):IntPoint {
 		var pos:IntPoint = entity.getPosition();
 		var bound:Rectangle = entity.getBound();
 		var moveVector:IntPoint = new IntPoint( Math.floor( entity.getXSpeed() ),  Math.floor( entity.getYSpeed() ) );
+		var collisionVector:IntPoint = new IntPoint( 0, 0 );
 		
 		//bottom collision
 		if( moveVector.y > 0 ) {
@@ -222,11 +239,13 @@ class Game
 			while ( _scene.isCollision( leftFoot, pos.y + leftDist ) && leftDist > 0 ) {
 				leftDist--;
 				entity.grounded();
+				collisionVector.y = 1;
 			}
 			
 			while ( _scene.isCollision( rightFoot, pos.y + rightDist ) && rightDist > 0 ) {
 				rightDist--;
 				entity.grounded();
+				collisionVector.y = 1;
 			}
 			
 			moveVector.y = Math.round( Math.min( leftDist, rightDist ) );
@@ -241,11 +260,13 @@ class Game
 			while ( _scene.isCollision( leftTop, pos.y -  Math.ceil( bound.height ) + leftDist ) && leftDist < 0 ) {
 				leftDist++;
 				entity.setYSpeed( 0 );
+				collisionVector.y = -1;
 			}
 			
 			while ( _scene.isCollision( righTop, pos.y -  Math.ceil( bound.height ) + rightDist ) && rightDist < 0 ) {
 				rightDist++;
 				entity.setYSpeed( 0 );
+				collisionVector.y = -1;
 			}
 			
 			moveVector.y = Math.round( Math.max( leftDist, rightDist ) );
@@ -263,16 +284,19 @@ class Game
 			while ( _scene.isCollision( pos.x + bottomDist, bottom ) && bottomDist < 0 ) {
 				bottomDist++;
 				entity.setXSpeed( 0 );
+				collisionVector.x = -1;
 			}
 			
 			while ( _scene.isCollision( pos.x + topDist, top ) && topDist < 0 ) {
 				topDist++;
 				entity.setXSpeed( 0 );
+				collisionVector.x = -1;
 			}
 			
 			while ( _scene.isCollision( pos.x + middleDist, middle ) && middleDist < 0 ) {
 				middleDist++;
 				entity.setXSpeed( 0 );
+				collisionVector.x = -1;
 			}
 			
 			moveVector.x = Math.round( Math.max( middleDist, Math.max( bottomDist, topDist ) ) );
@@ -289,22 +313,27 @@ class Game
 			while ( _scene.isCollision( pos.x + width + bottomDist, bottom ) && bottomDist > 0 ) {
 				bottomDist--;
 				entity.setXSpeed( 0 );
+				collisionVector.x = 1;
 			}
 			
 			while ( _scene.isCollision( pos.x + width + topDist, top ) && topDist > 0 ) {
 				topDist--;
 				entity.setXSpeed( 0 );
+				collisionVector.x = 1;
 			}
 			
 			while ( _scene.isCollision( pos.x + width + middleDist, middle ) && middleDist > 0 ) {
 				middleDist--;
 				entity.setXSpeed( 0 );
+				collisionVector.x = 1;
 			}
 			
 			moveVector.x = Math.round( Math.min( middleDist, Math.min( bottomDist, topDist ) ) );
 		}
 		
 		entity.setPosition( pos.x + moveVector.x, pos.y + moveVector.y );
+		
+		return collisionVector;
 	}
 	
 }

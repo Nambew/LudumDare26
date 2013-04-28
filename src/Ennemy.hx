@@ -1,5 +1,6 @@
 package ;
 import flash.display.BitmapData;
+import flash.geom.Point;
 import flash.geom.Rectangle;
 
 /**
@@ -8,8 +9,7 @@ import flash.geom.Rectangle;
  */
 class Ennemy implements PhysicEntity
 {
-
-	private var _bitmapData:BitmapData;
+	private static var _bitmapData:BitmapData;
 	
 	private var _position:IntPoint;
 	private var _isGrounded:Bool;
@@ -19,30 +19,47 @@ class Ennemy implements PhysicEntity
 	private var _active:Bool;
 	private var _dim:Rectangle;
 	
-	private var _maxSpeed:Float = 5;
+	private var _maxSpeed:Float = 3;
 	private var _xSpeed:Float = 0;
 	private var _ySpeed:Float = 0;
 	private var _jumpSpeed:Float = 6;
 	
-	public function new( startPos:IntPoint, scene:Scene ) 
+	private var _startPos:IntPoint;
+	private var _endPos:IntPoint;
+	private var _targetPos:IntPoint;
+	
+	private var _waitTime:Int = 0;
+	private var _collision:IntPoint;
+	private var _pursuitMode:Bool;
+	
+	public function new( startPos:IntPoint, game:Scene, endPos:IntPoint ) 
 	{
+		_collision = new IntPoint(0, 0);
+		_startPos = startPos.clone();
+		_endPos = endPos;
+		_targetPos = _endPos.clone();
+		
 		_position = startPos;
 		_active = false;
-		_dim = new Rectangle( 0, 0, 32, 32 );
+		_dim = new Rectangle( 0, 0, 32, 26 );
+		_pursuitMode = false;
 	}
 	
 	/* INTERFACE PhysicEntity */
 	
 	public function activate():Void {
 		_active = true;
-		_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.round(_dim.height ), true );
+		
 		draw();
 	}
 	
 	private function draw():Void {
-		_bitmapData.fillRect( new Rectangle(0, 0, 32, 10 ), 0xFF999999 );
-		_bitmapData.fillRect( new Rectangle(8, 22, 16, 10 ), 0xFF999999 );
-		_bitmapData.fillRect( new Rectangle(0, 22, 32, 10 ), 0xFF999999 );
+		if( _bitmapData == null ) {
+			_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.round(_dim.height ), true, 0x00000000 );
+			_bitmapData.fillRect( new Rectangle(0, 0, 32, 10 ), 0xFF999999 );
+			_bitmapData.fillRect( new Rectangle(8, 10, 16, 14 ), 0xFF999999 );
+			_bitmapData.fillRect( new Rectangle(0, 14, 32, 10 ), 0xFF999999 );
+		}
 	}
 	
 	public function deactivate():Void {
@@ -54,7 +71,67 @@ class Ennemy implements PhysicEntity
 		return _active;
 	}
 	
-	public function ia( stealth:Bool ):Void {
+	public function ia( stealth:Bool, playerPos:IntPoint ):Void {
+		var playerDistance:Float = Math.sqrt( Math.pow( _position.x - playerPos.x, 2 ) + Math.pow( _position.y - playerPos.y, 2 ) );
+		var playerTooFar:Bool = ( playerDistance > 200 ) ;
+		
+		if ( stealth || playerTooFar ) {
+			if ( _pursuitMode ) {
+				_targetPos = _startPos.clone();
+			}
+			
+			_pursuitMode = false;
+		} else if( !stealth && !playerTooFar ) {
+			_pursuitMode = true;
+		}
+		
+		if ( _pursuitMode ) {
+			if ( _position.x > playerPos.x ) {
+				setXSpeed( _xSpeed - 1 );
+			} else if ( _position.x < playerPos.x ) {
+				setXSpeed( _xSpeed + 1 );
+			} else {
+				_xSpeed = 0;
+			}
+			
+			if ( _collision.x != 0 && playerPos.y < _position.y ) {
+				this.jump();
+			}
+		} else {
+			if ( _waitTime > 0 ) {
+				_waitTime--;
+			} else {
+				var dist:Float =  Math.sqrt( Math.pow( _position.x - _targetPos.x, 2 ) + Math.pow( _position.y - _targetPos.y, 2 ) );
+				
+				if ( dist <= 5 ) {
+					_waitTime = 50;
+					_xSpeed = 0;
+					_ySpeed = 0;
+					
+					if ( _targetPos.equal( _startPos ) ) {
+						_targetPos = _endPos.clone();
+					} else {
+						_targetPos = _startPos.clone();
+					}
+					
+				} else {
+					if ( _position.x > _targetPos.x ) {
+						setXSpeed( _xSpeed - 1 );
+					} else if ( _position.x < _targetPos.x ) {
+						setXSpeed( _xSpeed + 1 );
+					} else {
+						_xSpeed = 0;
+					}
+					
+					if ( _collision.x != 0 && _targetPos.y < _position.y ) {
+						this.jump();
+					}
+				}
+				
+			}
+			
+		}
+		
 		
 	}
 	
@@ -93,6 +170,11 @@ class Ennemy implements PhysicEntity
 		return _isJumping;
 	}
 	
+	public function jump():Void {
+		_isJumping = true;
+		_ySpeed = -_jumpSpeed;
+	}
+	
 	public function grounded():Void 
 	{
 		_isGrounded = true;
@@ -128,6 +210,9 @@ class Ennemy implements PhysicEntity
 	public function setXSpeed(v:Float):Void 
 	{
 		_xSpeed = v;
+		
+		if ( v < 0 && _xSpeed < -_maxSpeed ) _xSpeed = -_maxSpeed;
+		else if ( v > 0 && _xSpeed > _maxSpeed ) _xSpeed = _maxSpeed;
 	}
 	
 	public function isWalking():Bool 
@@ -143,6 +228,14 @@ class Ennemy implements PhysicEntity
 	public function stop():Void 
 	{
 		_walking = false;
+	}
+	
+	public function getTopLeftCorner():Point {
+		return new Point( _position.x, _position.y - _dim.height );
+	}
+	
+	public function setCollision( v:IntPoint ):Void {
+		_collision = v;
 	}
 	
 }

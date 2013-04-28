@@ -24,5 +24,6 @@ interface PhysicEntity
 	public function isWalking():Bool;
 	public function walk():Void;
 	public function stop():Void;
+	public function setCollision( v:IntPoint ):Void;
 	
 }

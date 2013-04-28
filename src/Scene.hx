@@ -41,11 +41,12 @@ class Scene extends Bitmap
 		
 		this.bitmapData.copyPixels( _background, new Rectangle( _camera.x, _camera.y, 600, 400 ), new Point( 0, 0 ) );
 		
-		this.bitmapData.copyPixels( _player.getBitmapData(), _player.getBound(), new Point( _player.getTopLeftCorner().x - _camera.x, _player.getTopLeftCorner().y - _camera.y ) );
 		
 		for ( enemy in _ennymies ) {
-			
+			this.bitmapData.copyPixels( enemy.getBitmapData(), enemy.getBound(), new Point( enemy.getTopLeftCorner().x - _camera.x, enemy.getTopLeftCorner().y - _camera.y ), null, null, true );
 		}
+		
+		this.bitmapData.copyPixels( _player.getBitmapData(), _player.getBound(), new Point( _player.getTopLeftCorner().x - _camera.x, _player.getTopLeftCorner().y - _camera.y ), null, null, true );
 		
 		this.bitmapData.unlock();
 	}
@@ -61,6 +62,8 @@ class Scene extends Bitmap
 	}
 	
 	public function addEnemy( enemy:Ennemy ):Void {
+		enemy.activate();
+		_ennymies.push( enemy );
 		
 	}
 	
