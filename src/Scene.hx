@@ -128,5 +128,369 @@ class Scene extends Bitmap
 		return _background.getPixel( x, y ) == _floorColor;
 	}
 	
+	public function rayCast( start:IntPoint, end:IntPoint ):Bool {
 	
+		return checkSegment( start.x, start.y, end.x, end.y );
+	}
+	
+	private function getSegment( x1:Int, y1:Int, x2:Int, y2:Int ):Array<IntPoint> {
+		var dx:Int, dy:Int;
+		var segment:Array<IntPoint> = new Array<IntPoint>();
+		
+		if( (dx = x2 - x1 ) != 0 ) {
+			if( dx > 0 ) {
+				if( (dy = y2 - y1 ) != 0 ) {
+					if( dy > 0 ) {
+
+						if( dx >= dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2;
+							dy *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( ++x1 == x2 )
+									break;
+									
+								if ( ( e -= dy ) < 0 ) {
+									y1++;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( ++y1 == y2 )
+									break;
+									
+								if ( ( e -= dx ) < 0 ) {
+									x1++;
+									e += dy;
+								}
+							}
+						}
+					} else {
+						if ( dx >= -dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2;
+							dy *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( ++x1 == x2 )
+									break;
+									
+								if ( ( e += dy ) < 0 ) {
+									y1++;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( --y1 == y2 )
+									break;
+									
+								if ( ( e += dx ) > 0 ) {
+									x1++;
+									e += dy;
+								}
+							}
+						}
+					}
+				} else {
+					
+					do {
+						segment.push( new IntPoint( x1, y1 ) );
+					} while ( ++x1 != x2 );
+				}
+			} else {
+				
+				if ( ( dy = y2 - y1 ) != 0 ) {
+					if( dy > 0 ) {
+						
+						if ( -dx >= dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2;
+							dy *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( --x1 == x2 )
+									break;
+									
+								if ( ( e += dy ) >= 0 ) {
+									y1++;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( ++y1 == y2 )
+									break;
+									
+								if ( ( e += dx ) <= 0 ) {
+									x1++;
+									e += dy;
+								}
+							}
+						}
+					} else {
+						
+						if ( dx <= dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2; 
+							dy *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( --x1 == x2 )
+									break;
+									
+								if ( ( e -= dy ) >= 0 ) {
+									y1--;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								segment.push( new IntPoint( x1, y1 ) );
+								if ( --y1 == y2 )
+									break;
+									
+								if ( ( e -= dx ) >= 0 ) {
+									x1--;
+									e += dy;
+								}
+							}
+						}
+					}
+				} else {
+					do {
+						segment.push( new IntPoint( x1, y1 ) );
+					} while ( --x1 != x2 );
+				}
+				
+			}
+		} else {
+
+			if ( ( dy = y2 - y1 ) != 0 ) {
+				if ( dy > 0 ) {
+					do {
+						segment.push( new IntPoint( x1, y1 ) );
+					} while ( ++y1 != y2 );
+				} else {
+					do {
+						segment.push( new IntPoint( x1, y1 ) );
+					} while ( --y1 != y2 );
+				}
+
+			}
+			
+		}
+		
+		return segment;
+		
+	}
+	
+	private function checkSegment( x1:Int, y1:Int, x2:Int, y2:Int ):Bool {
+		var dx:Int, dy:Int;
+		
+		if( (dx = x2 - x1 ) != 0 ) {
+			if( dx > 0 ) {
+				if( (dy = y2 - y1 ) != 0 ) {
+					if( dy > 0 ) {
+
+						if( dx >= dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2;
+							dy *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+
+								if ( ++x1 == x2 )
+									break;
+									
+								if ( ( e -= dy ) < 0 ) {
+									y1++;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( ++y1 == y2 )
+									break;
+									
+								if ( ( e -= dx ) < 0 ) {
+									x1++;
+									e += dy;
+								}
+							}
+						}
+					} else {
+						if ( dx >= -dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2;
+							dy *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( ++x1 == x2 )
+									break;
+									
+								if ( ( e += dy ) < 0 ) {
+									y1++;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( --y1 == y2 )
+									break;
+									
+								if ( ( e += dx ) > 0 ) {
+									x1++;
+									e += dy;
+								}
+							}
+						}
+					}
+				} else {
+					
+					do {
+						if ( isCollision( x1, y1 ) ) return false;
+					} while ( ++x1 != x2 );
+				}
+			} else {
+				
+				if ( ( dy = y2 - y1 ) != 0 ) {
+					if( dy > 0 ) {
+						
+						if ( -dx >= dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2;
+							dy *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( --x1 == x2 )
+									break;
+									
+								if ( ( e += dy ) >= 0 ) {
+									y1++;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( ++y1 == y2 )
+									break;
+									
+								if ( ( e += dx ) <= 0 ) {
+									x1++;
+									e += dy;
+								}
+							}
+						}
+					} else {
+						
+						if ( dx <= dy ) {
+							var e:Int;
+							dx = ( e = dx ) * 2; 
+							dy *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( --x1 == x2 )
+									break;
+									
+								if ( ( e -= dy ) >= 0 ) {
+									y1--;
+									e += dx;
+								}
+							}
+						} else {
+							var e:Int;
+							dy = ( e = dy ) * 2;
+							dx *= 2;
+							
+							while ( true ) {
+								if ( isCollision( x1, y1 ) ) return false;
+								
+								if ( --y1 == y2 )
+									break;
+									
+								if ( ( e -= dx ) >= 0 ) {
+									x1--;
+									e += dy;
+								}
+							}
+						}
+					}
+				} else {
+					do {
+						if ( isCollision( x1, y1 ) ) return false;
+					} while ( --x1 != x2 );
+				}
+				
+			}
+		} else {
+
+			if ( ( dy = y2 - y1 ) != 0 ) {
+				if ( dy > 0 ) {
+					do {
+						if ( isCollision( x1, y1 ) ) return false;
+					} while ( ++y1 != y2 );
+				} else {
+					do {
+						if ( isCollision( x1, y1 ) ) return false;
+					} while ( --y1 != y2 );
+				}
+
+			}
+			
+		}
+		
+		return true;
+		
+	}
 }

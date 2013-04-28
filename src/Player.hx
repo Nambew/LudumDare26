@@ -24,7 +24,7 @@ class Player implements PhysicEntity
 	private var _ySpeed:Float = 0;
 	private var _jumpSpeed:Float = 8;
 	
-	private var _colorIndex:Int = 12;
+	private var _colorIndex:Int = 0;
 	private var _colors:Array<UInt>;
 	
 	public function new() 
@@ -38,7 +38,18 @@ class Player implements PhysicEntity
 		
 		var tpColor:UInt = 0;
 		
-		for ( r in 0...3 ) {
+		_colors.push( 0x777777 );
+		_colors.push( 0xFF0000 );
+		_colors.push( 0x00FF00 );
+		_colors.push( 0x0000FF );
+		_colors.push( 0x770000 );
+		_colors.push( 0x007700 );
+		_colors.push( 0x000077 );
+		_colors.push( 0xFFFF00 );
+		_colors.push( 0x00FFFF );
+		_colors.push( 0xFF00FF );
+		
+		/*for ( r in 0...3 ) {
 			for ( g in 0...3 ) {
 				for ( b in 0...3 ) {
 					switch( r ) {
@@ -69,7 +80,7 @@ class Player implements PhysicEntity
 					}
 				}
 			}
-		}
+		}*/
 		
 		
 		_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.floor( _dim.height ), true, getColor() + 0xFF000000 );
@@ -216,5 +227,13 @@ class Player implements PhysicEntity
 	
 	public function setCollision( v:IntPoint ):Void {
 		
+	}
+	
+	public function getWidth():Int {
+		return Math.ceil( _dim.width );
+	}
+	
+	public function getHeight():Int {
+		return Math.ceil( _dim.height );
 	}
 }

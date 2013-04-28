@@ -57,17 +57,26 @@ class Game
 		
 		_ennemies = new Array<Ennemy>();
 		
-		_ennemies.push( new Ennemy( new IntPoint( 464, 111 ), _scene, new IntPoint( 20 * 16, 9 * 16 ) ) );
+		
 		
 		_scene = new Scene( 600, 400 );
 		_scene.setBackground( new BgLevel1( 0, 0 ) );
 		_scene.setPlayer( _player );
 		
-		_scene.addEnemy( _ennemies[ 0 ] );
+		_ennemies.push( new Ennemy( new IntPoint( 464, 111 ), _scene, new IntPoint( 20 * 16, 9 * 16 ) ) );
+		_ennemies.push( new Ennemy( new IntPoint( 53 * 16, 7 * 16 ), _scene, new IntPoint( 53 * 16, 7 * 16 ) ) );
+		_ennemies.push( new Ennemy( new IntPoint( 49 * 16, 13 * 16 ), _scene, new IntPoint( 49 * 16, 13 * 16 ) ) );
+		
+		for( enemy in _ennemies ) {
+			_scene.addEnemy( enemy );
+		}
 		
 		_physicEntites = new Array<PhysicEntity>();
 		_physicEntites.push( _player );
-		_physicEntites.push( _ennemies[ 0 ] );
+		
+		for( enemy in _ennemies ) {
+			_physicEntites.push( enemy );
+		}
 		
 		
 		_stage = Lib.current.stage;
@@ -180,7 +189,7 @@ class Game
 	private function resolveIA():Void {
 		for ( ennemy in _ennemies ) {
 			if ( ennemy.isActive() ) {
-				ennemy.ia( _stealthMode, _player.getPosition() );
+				ennemy.ia( _stealthMode, _player.getPosition(), new IntPoint( _player.getWidth(), _player.getHeight() ) );
 			}
 		}
 	}

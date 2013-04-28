@@ -32,12 +32,15 @@ class Ennemy implements PhysicEntity
 	private var _collision:IntPoint;
 	private var _pursuitMode:Bool;
 	
-	public function new( startPos:IntPoint, game:Scene, endPos:IntPoint ) 
+	private var _scene:Scene;
+	
+	public function new( startPos:IntPoint, scene:Scene, endPos:IntPoint ) 
 	{
 		_collision = new IntPoint(0, 0);
 		_startPos = startPos.clone();
 		_endPos = endPos;
 		_targetPos = _endPos.clone();
+		_scene = scene;
 		
 		_position = startPos;
 		_active = false;
@@ -71,17 +74,22 @@ class Ennemy implements PhysicEntity
 		return _active;
 	}
 	
-	public function ia( stealth:Bool, playerPos:IntPoint ):Void {
+	public function ia( stealth:Bool, playerPos:IntPoint, playerSize:IntPoint ):Void {
 		var playerDistance:Float = Math.sqrt( Math.pow( _position.x - playerPos.x, 2 ) + Math.pow( _position.y - playerPos.y, 2 ) );
 		var playerTooFar:Bool = ( playerDistance > 200 ) ;
+		var playerVisible:Bool = false;
+		if ( !playerTooFar && !stealth ) {
+			playerVisible = _scene.rayCast( new IntPoint( _position.x + Math.round( _dim.width / 2 ), _position.y - Math.round( _dim.height / 2 ) )
+						, new IntPoint( playerPos.x + Math.round( playerSize.x / 2 ), playerPos.y - Math.round( playerSize.y / 2 ) ) );
+		}
 		
-		if ( stealth || playerTooFar ) {
+		if ( stealth || playerTooFar || !playerVisible ) {
 			if ( _pursuitMode ) {
 				_targetPos = _startPos.clone();
 			}
 			
 			_pursuitMode = false;
-		} else if( !stealth && !playerTooFar ) {
+		} else if( !stealth && !playerTooFar && playerVisible ) {
 			_pursuitMode = true;
 		}
 		
