@@ -1,8 +1,10 @@
 package ;
 import flash.display.Bitmap;
 import flash.display.BitmapData;
+import flash.display.Sprite;
 import flash.display.Stage;
 import flash.events.Event;
+import flash.events.MouseEvent;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.text.TextField;
@@ -17,7 +19,10 @@ using StringTools;
  * @author andre
  */
 
-@:bitmap("gfx/level1.png") class BgLevel1 extends flash.display.BitmapData {}
+@:bitmap("gfx/title.png") class TitleScreen extends flash.display.BitmapData {}
+@:bitmap("gfx/gameover.png") class GameOverScreen extends flash.display.BitmapData {}
+@:bitmap("gfx/success.png") class SuccessScreen extends flash.display.BitmapData {}
+
  
 class Game
 {
@@ -44,78 +49,79 @@ class Game
 	private var _ftpsTime:Int;
 	private var _frameCount:Int = 0;
 	private var _stealthMode:Bool = false;
+	private var _goal:Rectangle;
+	private var _contener:Sprite;
+	private var _screen:Sprite;
+	private var _level:Level;
 	
-	public function new() 
+	public function new( stage:Stage ) 
 	{
-		Lib.current.stage.addEventListener( Event.ENTER_FRAME, gameLoop );
+		_stage = stage;
+		_contener = new Sprite();
+		_screen = new Sprite();
+		_stage.addChild( _contener );
+		_stage.addChild( _screen );
 		
-		_key = new KeyboardRegistry( Lib.current.stage );
+		
+		_level = new Level1();
+		
+		_key = new KeyboardRegistry( _stage );
 		
 		_pos = new Point( 0, 0 );
 		_player = new Player();
-		_player.setPosition( 20, 120 );
+		
 		
 		_enemies = new Array<Enemy>();
 		
 		
 		
 		_scene = new Scene( 600, 400 );
-		_scene.setBackground( new BgLevel1( 0, 0 ) );
+		_scene.setBackground( _level.getBackground() );
 		_scene.setPlayer( _player );
 		
-		_enemies.push( new Enemy( new IntPoint( 464, 111 ), _scene, new IntPoint( 20 * 16, 9 * 16 ) ) );
-		_enemies.push( new Enemy( new IntPoint( 53 * 16, 7 * 16 ), _scene, new IntPoint( 53 * 16, 7 * 16 ) ) );
-		_enemies.push( new Enemy( new IntPoint( 49 * 16, 13 * 16 ), _scene, new IntPoint( 49 * 16, 13 * 16 ) ) );
-		
-		for( enemy in _enemies ) {
-			_scene.addEnemy( enemy );
-		}
-		
 		_physicEntites = new Array<PhysicEntity>();
-		_physicEntites.push( _player );
 		
-		for( enemy in _enemies ) {
-			_physicEntites.push( enemy );
-		}
-		
-		
-		_stage = Lib.current.stage;
-		
-		_stage.addChild( _scene );
-		
-		_textColor = new TextField();
-		_textColor.textColor = 0;
-		_textColor.border = true;
-		_textColor.x = _stage.stageWidth - 100;
-		_textColor.y = _stage.stageHeight - 70;
-		_textColor.height = 20;
-		_textColor.width = 100;
-		_textColor.text = "Color:";
-		
-		_stage.addChild( _textColor );
-		
-		_textFPS = new TextField();
-		_textFPS.textColor = 0;
-		_textFPS.border = true;
-		_textFPS.height = 20;
-		_textFPS.width = 100;
-		_textFPS.x = _stage.stageWidth - 100;
-		_textFPS.y = _stage.stageHeight - 30;
-		_textFPS.text = "FPS:";
-		
-		_stage.addChild( _textFPS );
-		
-		_textStealth = new TextField();
-		_textStealth.textColor = 0;
-		_textStealth.border = true;
-		_textStealth.height = 20;
-		_textStealth.width = 100;
+		_contener.addChild( _scene );
+		_goal = _level.getGoal();
+		#if debugmode
+			_textColor = new TextField();
+			_textColor.textColor = 0;
+			_textColor.border = true;
+			_textColor.x = _stage.stageWidth + 20;
+			_textColor.y = _stage.stageHeight - 70;
+			_textColor.height = 20;
+			_textColor.width = 100;
+			_textColor.text = "Color:";
+			
+			_contener.addChild( _textColor );
+			
+			_textFPS = new TextField();
+			_textFPS.textColor = 0;
+			_textFPS.border = true;
+			_textFPS.height = 20;
+			_textFPS.width = 100;
+			_textFPS.x = _stage.stageWidth + 20;
+			_textFPS.y = _stage.stageHeight - 30;
+			_textFPS.text = "FPS:";
+			
+			_contener.addChild( _textFPS );
+			
+			_textStealth = new TextField();
+			_textStealth.textColor = 0;
+			_textStealth.border = true;
+			_textStealth.height = 20;
+			_textStealth.width = 100;
 
-		_textStealth.x = _stage.stageWidth - 100;
-		_textStealth.y = _stage.stageHeight - 100;
-		_textStealth.text = "Stealth:";
+			_textStealth.x = _stage.stageWidth + 20;
+			_textStealth.y = _stage.stageHeight - 100;
+			_textStealth.text = "Stealth:";
+			
+			_contener.addChild( _textStealth );
+		#end
 		
-		_stage.addChild( _textStealth );
+		
+		
+		showTitleScreen();
 	}
 	
 	private function isPlayerStealth():Bool {
@@ -123,9 +129,47 @@ class Game
 	}
 	
 	public function start():Void {
+		reset();
+		_stage.addEventListener( Event.ENTER_FRAME, gameLoop );
 		_ftpsTime = flash.Lib.getTimer();
 		_frameCount = 0;
 		_key.activate();
+	}
+	
+	public function end( success:Bool ):Void {
+		_stage.removeEventListener( Event.ENTER_FRAME, gameLoop );
+		_key.deactivate();
+		
+		if ( success ) {
+			showSuccess();
+		} else {
+			showGameOver();
+		}
+	}
+	
+	private function reset():Void {
+		_player.setPosition( _level.getPlayerPosition().x, _level.getPlayerPosition().y );
+		_scene.reset();
+		
+		_physicEntites = new Array<PhysicEntity>();
+		_enemies = new Array<Enemy>();
+		
+		_physicEntites.push( _player );
+		
+		for ( enemyData in _level.getEnemies() ) {
+			_enemies.push( new Enemy( enemyData.start.clone(), _scene, enemyData.end.clone() ) );
+		}
+		
+		for( enemy in _enemies ) {
+			_scene.addEnemy( enemy );
+			_physicEntites.push( enemy );
+		}
+		
+		_key.clear();
+	}
+	
+	private function retry():Void {
+		start();
 	}
 	
 	private function updateText():Void {
@@ -154,20 +198,27 @@ class Game
 		
 		if ( _key.isToggle( Keyboard.A ) ) {
 			_player.addColor();
-			updateText();
+			#if debugmode
+				updateText();
+			#end
 		}
 		
 		if ( _key.isToggle( Keyboard.S ) ) {
 			_player.removeColor();
-			updateText();
+			#if debugmode
+				updateText();
+			#end
 		}
 		
 		_stealthMode = isPlayerStealth();
-		if ( _stealthMode ) {	
-			_textStealth.text = "Stealth: YES"; 
-		} else {
-			_textStealth.text = "Stealth: NO"; 
-		}
+		
+		#if debugmode
+			if ( _stealthMode ) {	
+				_textStealth.text = "Stealth: YES"; 
+			} else {
+				_textStealth.text = "Stealth: NO"; 
+			}
+		#end
 		
 		resolveIA();
 		
@@ -176,17 +227,22 @@ class Game
 		_scene.refresh();
 		
 		if ( !_stealthMode && gameIsOver() ) {
-			trace( "GAME OVER" );
+			end( false );
+		} else if ( checkGoal() ) {
+			end( true );
 		}
+
 		
-		var currentTime:Float = ( Lib.getTimer() - _ftpsTime ) / 1000;
-		_frameCount++;
-		
-		if( currentTime > 1. ) {
-			_textFPS.text = "FPS:" + ( _frameCount / currentTime );
-			_frameCount = 0;
-			_ftpsTime = Lib.getTimer();
-		}
+		#if debugmode
+			var currentTime:Float = ( Lib.getTimer() - _ftpsTime ) / 1000;
+			_frameCount++;
+			
+			if( currentTime > 1. ) {
+				_textFPS.text = "FPS:" + ( _frameCount / currentTime );
+				_frameCount = 0;
+				_ftpsTime = Lib.getTimer();
+			}
+		#end
 		
 	}
 	
@@ -214,6 +270,14 @@ class Game
 		}
 		
 		return false;
+	}
+	
+	private function checkGoal():Bool {
+		var playerRect:Rectangle = _player.getBound().clone();
+		playerRect.y = _player.getPosition().y - playerRect.height;
+		playerRect.x = _player.getPosition().x;
+		
+		return _goal.intersects( playerRect );
 	}
 	
 	private function resolvePhysic():Void {
@@ -365,6 +429,37 @@ class Game
 		entity.setPosition( pos.x + moveVector.x, pos.y + moveVector.y );
 		
 		return collisionVector;
+	}
+	
+	private function showTitleScreen():Void {
+		var bmp:Bitmap = new Bitmap( new TitleScreen( 0, 0 ) );
+		_screen.addChild( bmp );
+		
+		_stage.addEventListener( MouseEvent.CLICK, onClickTitle );
+	}
+	
+	private function onClickTitle( e:MouseEvent ):Void {
+		_stage.removeEventListener( MouseEvent.CLICK, onClickTitle );
+		_screen.removeChildAt( 0 );
+		start();
+	}
+	
+	private function showGameOver():Void {
+		var bmp:Bitmap = new Bitmap( new GameOverScreen( 0, 0 ) );
+		_screen.addChild( bmp );
+		
+		_stage.addEventListener( MouseEvent.CLICK, onClickRetry );
+	}
+	
+	private function onClickRetry( evt:MouseEvent ):Void {
+		_stage.removeEventListener( MouseEvent.CLICK, onClickRetry );
+		_screen.removeChildAt( 0 );
+		retry();
+	}
+	
+	private function showSuccess():Void {
+		var bmp:Bitmap = new Bitmap( new SuccessScreen( 0, 0 ) );
+		_screen.addChild( bmp );
 	}
 	
 }

@@ -9,6 +9,8 @@ import flash.Lib;
  * @author andre
  */
 
+
+
 class Main 
 {
 	
@@ -18,7 +20,11 @@ class Main
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		
-		( new Game() ).start();
+		
+		
+		( new Game( stage ) ).start();
 	}
+	
+	
 	
 }

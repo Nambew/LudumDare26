@@ -36,8 +36,6 @@ class Player implements PhysicEntity
 		
 		_colors = new Array<UInt>();
 		
-		var tpColor:UInt = 0;
-		
 		_colors.push( 0x777777 );
 		_colors.push( 0xFF0000 );
 		_colors.push( 0x00FF00 );
@@ -49,44 +47,21 @@ class Player implements PhysicEntity
 		_colors.push( 0x00FFFF );
 		_colors.push( 0xFF00FF );
 		
-		/*for ( r in 0...3 ) {
-			for ( g in 0...3 ) {
-				for ( b in 0...3 ) {
-					switch( r ) {
-						case 0:
-							tpColor = 0;
-						case 1:
-							tpColor = 0x770000;
-						case 2:
-							tpColor = 0xFF0000;
-					}
-					
-					switch( g ) {
-						case 1:
-							tpColor += 0x7700;
-						case 2:
-							tpColor += 0xFF00;
-					}
-					
-					switch( b ) {
-						case 1:
-							tpColor += 0x77;
-						case 2:
-							tpColor += 0xFF;
-					}
-					
-					if ( tpColor != 0xFFFFFF && tpColor != 0 ) {
-						_colors.push( tpColor );
-					}
-				}
-			}
-		}*/
-		
 		
 		_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.floor( _dim.height ), true, getColor() + 0xFF000000 );
 		_border = new BitmapData( Math.floor( _dim.width ), Math.floor( _dim.height ), true, 0 );
 		
 		drawBorder();
+	}
+	
+	public function reset():Void {
+		_colorIndex = 0;
+		_xSpeed = 0;
+		_ySpeed = 0;
+		_jumpSpeed = 0;
+		_walking = false;
+		
+		grounded();
 	}
 	
 	private function drawBorder():Void {

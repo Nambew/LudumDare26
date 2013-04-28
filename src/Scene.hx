@@ -67,6 +67,14 @@ class Scene extends Bitmap
 		
 	}
 	
+	public function reset():Void {
+		for ( enemy in _enemies ) {
+			enemy.deactivate();
+		}
+		
+		_enemies = new Array<Enemy>();
+	}
+	
 	public function updateCamera():Void {
 		var pos:IntPoint = _player.getPosition();
 		_camera.x = pos.x - Math.floor( _dimensions.x / 2 );

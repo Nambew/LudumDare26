@@ -13,11 +13,15 @@ class KeyboardRegistry
 	private var _pressKeys:IntMap<Bool>;
 	private var _target:DisplayObject;
 	private var _activate:Bool;
-
 	
 	public function new( target:DisplayObject ) 
 	{
 		_target = target;
+		_pressKeys = new IntMap<Bool>();
+		_activate = false;
+	}
+	
+	public function clear():Void {
 		_pressKeys = new IntMap<Bool>();
 		_activate = false;
 	}
