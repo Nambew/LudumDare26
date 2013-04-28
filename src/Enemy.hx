@@ -7,7 +7,7 @@ import flash.geom.Rectangle;
  * ...
  * @author andre
  */
-class Ennemy implements PhysicEntity
+class Enemy implements PhysicEntity
 {
 	private static var _bitmapData:BitmapData;
 	

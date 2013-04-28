@@ -32,7 +32,7 @@ class Game
 	
 	private var _scene:Scene;
 	private var _player:Player;
-	private var _ennemies:Array<Ennemy>;
+	private var _enemies:Array<Enemy>;
 	
 	private var _textColor:TextField;
 	private var _textFPS:TextField;
@@ -55,7 +55,7 @@ class Game
 		_player = new Player();
 		_player.setPosition( 20, 120 );
 		
-		_ennemies = new Array<Ennemy>();
+		_enemies = new Array<Enemy>();
 		
 		
 		
@@ -63,18 +63,18 @@ class Game
 		_scene.setBackground( new BgLevel1( 0, 0 ) );
 		_scene.setPlayer( _player );
 		
-		_ennemies.push( new Ennemy( new IntPoint( 464, 111 ), _scene, new IntPoint( 20 * 16, 9 * 16 ) ) );
-		_ennemies.push( new Ennemy( new IntPoint( 53 * 16, 7 * 16 ), _scene, new IntPoint( 53 * 16, 7 * 16 ) ) );
-		_ennemies.push( new Ennemy( new IntPoint( 49 * 16, 13 * 16 ), _scene, new IntPoint( 49 * 16, 13 * 16 ) ) );
+		_enemies.push( new Enemy( new IntPoint( 464, 111 ), _scene, new IntPoint( 20 * 16, 9 * 16 ) ) );
+		_enemies.push( new Enemy( new IntPoint( 53 * 16, 7 * 16 ), _scene, new IntPoint( 53 * 16, 7 * 16 ) ) );
+		_enemies.push( new Enemy( new IntPoint( 49 * 16, 13 * 16 ), _scene, new IntPoint( 49 * 16, 13 * 16 ) ) );
 		
-		for( enemy in _ennemies ) {
+		for( enemy in _enemies ) {
 			_scene.addEnemy( enemy );
 		}
 		
 		_physicEntites = new Array<PhysicEntity>();
 		_physicEntites.push( _player );
 		
-		for( enemy in _ennemies ) {
+		for( enemy in _enemies ) {
 			_physicEntites.push( enemy );
 		}
 		
@@ -175,6 +175,10 @@ class Game
 		
 		_scene.refresh();
 		
+		if ( !_stealthMode && gameIsOver() ) {
+			trace( "GAME OVER" );
+		}
+		
 		var currentTime:Float = ( Lib.getTimer() - _ftpsTime ) / 1000;
 		_frameCount++;
 		
@@ -187,11 +191,29 @@ class Game
 	}
 	
 	private function resolveIA():Void {
-		for ( ennemy in _ennemies ) {
+		for ( ennemy in _enemies ) {
 			if ( ennemy.isActive() ) {
 				ennemy.ia( _stealthMode, _player.getPosition(), new IntPoint( _player.getWidth(), _player.getHeight() ) );
 			}
 		}
+	}
+	
+	private function gameIsOver():Bool {
+		var dim:Rectangle;
+		var playerRect:Rectangle = _player.getBound().clone();
+		playerRect.y = _player.getPosition().y - playerRect.height;
+		playerRect.x = _player.getPosition().x;
+		
+		for ( enemy in _enemies ) {
+			dim = enemy.getBound().clone();
+			dim.y = enemy.getPosition().y - dim.height;
+			dim.x = enemy.getPosition().x;
+			
+			if ( dim.intersects( playerRect ) )
+				return true;
+		}
+		
+		return false;
 	}
 	
 	private function resolvePhysic():Void {

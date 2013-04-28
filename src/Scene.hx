@@ -23,7 +23,7 @@ class Scene extends Bitmap
 	
 	private var _player:Player;
 	
-	private var _ennymies:Array<Ennemy>;
+	private var _enemies:Array<Enemy>;
 	
 	public function new( width:UInt, height:UInt ) 
 	{
@@ -31,7 +31,7 @@ class Scene extends Bitmap
 
 		_dimensions = new IntPoint( width, height );
 		_camera = new IntPoint( 0, 0 );
-		_ennymies = new Array<Ennemy>();
+		_enemies = new Array<Enemy>();
 	}
 	
 	public function refresh():Void {
@@ -42,7 +42,7 @@ class Scene extends Bitmap
 		this.bitmapData.copyPixels( _background, new Rectangle( _camera.x, _camera.y, 600, 400 ), new Point( 0, 0 ) );
 		
 		
-		for ( enemy in _ennymies ) {
+		for ( enemy in _enemies ) {
 			this.bitmapData.copyPixels( enemy.getBitmapData(), enemy.getBound(), new Point( enemy.getTopLeftCorner().x - _camera.x, enemy.getTopLeftCorner().y - _camera.y ), null, null, true );
 		}
 		
@@ -61,9 +61,9 @@ class Scene extends Bitmap
 		_player = player;
 	}
 	
-	public function addEnemy( enemy:Ennemy ):Void {
+	public function addEnemy( enemy:Enemy ):Void {
 		enemy.activate();
-		_ennymies.push( enemy );
+		_enemies.push( enemy );
 		
 	}
 	
