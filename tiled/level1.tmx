@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="35" height="10" tilewidth="16" tileheight="16">
+<map version="1.0" orientation="orthogonal" width="60" height="29" tilewidth="16" tileheight="16">
  <tileset firstgid="1" name="mapsheet" tilewidth="16" tileheight="16">
   <image source="../gimp/mapsheet.png" width="160" height="160"/>
  </tileset>
- <layer name="Tile Layer 1" width="35" height="10">
+ <layer name="Tile Layer 1" width="60" height="29">
   <data encoding="base64" compression="zlib">
-   eJxjZGBgYBxEmGkQ4FG3UN8tbGh41C3Dxy20yN+kumWgyy1SMQAl+QKm
+   eJzt1jkOgDAMRFEHIcT9T0wbIRriZWxnit+SPDZniMjYrGOT6O2dxnu9QlvopRfhtZoTK9fQrPnXq5mNVnMWPfcj9mj1PlesmvecopfeKl7rf152r/d9jFrv/ohee5/mHOfljdhbpNfj7IX0Is6amZ9vhujt3YrX8/vK6K0cvb2LmJnZegDumw0B
   </data>
  </layer>
 </map>

@@ -23,20 +23,29 @@ class Scene extends Bitmap
 	
 	private var _player:Player;
 	
+	private var _ennymies:Array<Ennemy>;
+	
 	public function new( width:UInt, height:UInt ) 
 	{
 		super( new BitmapData( width, height ) );
 
 		_dimensions = new IntPoint( width, height );
 		_camera = new IntPoint( 0, 0 );
+		_ennymies = new Array<Ennemy>();
 	}
 	
 	public function refresh():Void {
 		this.bitmapData.lock();
 		
+		updateCamera();
+		
 		this.bitmapData.copyPixels( _background, new Rectangle( _camera.x, _camera.y, 600, 400 ), new Point( 0, 0 ) );
 		
-		this.bitmapData.copyPixels( _player.getBitmapData(), _player.getBound(), _player.getTopLeftCorner() );
+		this.bitmapData.copyPixels( _player.getBitmapData(), _player.getBound(), new Point( _player.getTopLeftCorner().x - _camera.x, _player.getTopLeftCorner().y - _camera.y ) );
+		
+		for ( enemy in _ennymies ) {
+			
+		}
 		
 		this.bitmapData.unlock();
 	}
@@ -51,26 +60,25 @@ class Scene extends Bitmap
 		_player = player;
 	}
 	
-	public function translateCamera( x:Int, y:Int ):Void {
-		_camera.x += x;
+	public function addEnemy( enemy:Ennemy ):Void {
+		
+	}
+	
+	public function updateCamera():Void {
+		var pos:IntPoint = _player.getPosition();
+		_camera.x = pos.x - Math.floor( _dimensions.x / 2 );
+		_camera.y = pos.y - 150;
 		
 		if ( _camera.x < 0 )
 			_camera.x = 0;
 		else if ( _camera.x > _maxX )
 			_camera.x = _maxX;
 			
-		_camera.y += y;
-		
 		if ( _camera.y < 0 )
 			_camera.y = 0;
 		else if ( _camera.y > _maxY )
 			_camera.y = _maxY;
-			
-		if ( _camera.x < 0 )
-			_camera.x = 0;
-			
-		if ( _camera.y < 0 )
-			_camera.y = 0;
+		
 	}
 	
 	public function checkColorRegion( rect:Rectangle, color:UInt ):Bool {
@@ -78,6 +86,8 @@ class Scene extends Bitmap
 		var maxY:Int = Math.floor(rect.height);
 		var posX:Int = Math.floor(rect.x);
 		var posY:Int = Math.floor(rect.y);
+		
+		
 		
 		for ( x in 0...maxX ) {
 			for ( y in 0...maxY ) {
@@ -113,38 +123,6 @@ class Scene extends Bitmap
 	
 	public function isCollision( x:Int, y:Int ):Bool {
 		return _background.getPixel( x, y ) == _floorColor;
-	}
-	
-	public function getFloorDistance( point:IntPoint ):Int {
-		var upDist:Int = 0;
-		var downDist:Int = 0;
-		var isFloorUp:Bool = true;
-		var isFloorDown:Bool = true;
-		var color:UInt;
-		
-		for ( y in 0...5 ) {
-			color = _background.getPixel( point.x, point.y - y - 1 );
-			if ( isFloorUp && color == _floorColor ) {
-				upDist++;
-			} else {
-				isFloorUp = false;
-			}
-			
-			color = _background.getPixel( point.x, point.y + y );
-			
-			if ( color == _floorColor ) {
-				isFloorDown = false;
-			} else if( isFloorDown ) {
-				downDist++;
-			}
-		}
-		
-		if ( upDist > 0 )
-			return -upDist;
-		else {
-			return downDist;
-		}
-
 	}
 	
 	

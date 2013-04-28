@@ -67,8 +67,8 @@ class Game
 		_textColor = new TextField();
 		_textColor.textColor = 0;
 		_textColor.border = true;
-		_textColor.x = _stage.width - 100;
-		_textColor.y = _stage.height - 70;
+		_textColor.x = _stage.stageWidth - 100;
+		_textColor.y = _stage.stageHeight - 70;
 		_textColor.height = 20;
 		_textColor.width = 100;
 		_textColor.text = "Color:";
@@ -80,8 +80,8 @@ class Game
 		_textFPS.border = true;
 		_textFPS.height = 20;
 		_textFPS.width = 100;
-		_textFPS.x = _stage.width - 100;
-		_textFPS.y = _stage.height - 30;
+		_textFPS.x = _stage.stageWidth - 100;
+		_textFPS.y = _stage.stageHeight - 30;
 		_textFPS.text = "FPS:";
 		
 		_stage.addChild( _textFPS );
@@ -91,8 +91,9 @@ class Game
 		_textStealth.border = true;
 		_textStealth.height = 20;
 		_textStealth.width = 100;
-		_textStealth.x = _stage.width - 100;
-		_textStealth.y = _stage.height - 100;
+
+		_textStealth.x = _stage.stageWidth - 100;
+		_textStealth.y = _stage.stageHeight - 100;
 		_textStealth.text = "Stealth:";
 		
 		_stage.addChild( _textStealth );
@@ -128,7 +129,7 @@ class Game
 			_player.setXSpeed( 0 );
 		}
 		
-		if ( !_player.isJumping() && _key.isDown( Keyboard.UP ) ) {
+		if ( !_player.isJumping() && ( _key.isDown( Keyboard.UP ) ||  _key.isDown( Keyboard.SPACE ) ) ) {
 			_player.jump();
 		}
 		
@@ -143,6 +144,9 @@ class Game
 		}
 		
 		if ( isPlayerStealth() ) {
+			
+			
+			
 			_textStealth.text = "Stealth: YES"; 
 		} else {
 			_textStealth.text = "Stealth: NO"; 
@@ -229,14 +233,32 @@ class Game
 			
 		// up collision
 		} else if ( moveVector.y < 0 ) {
+			var leftTop:Int = pos.x;
+			var righTop:Int = pos.x + Math.ceil( bound.width ) - 3;
+			var leftDist:Int = moveVector.y;
+			var rightDist:Int = moveVector.y;
 			
+			while ( _scene.isCollision( leftTop, pos.y -  Math.ceil( bound.height ) + leftDist ) && leftDist < 0 ) {
+				leftDist++;
+				entity.setYSpeed( 0 );
+			}
+			
+			while ( _scene.isCollision( righTop, pos.y -  Math.ceil( bound.height ) + rightDist ) && rightDist < 0 ) {
+				rightDist++;
+				entity.setYSpeed( 0 );
+			}
+			
+			moveVector.y = Math.round( Math.max( leftDist, rightDist ) );
 		}
 		
+		//left
 		if ( moveVector.x < 0 ) {
 			var top:Int = pos.y - Math.floor( bound.height );
 			var bottom:Int = pos.y;
+			var middle:Int = pos.y - Math.floor( bound.height / 2 );
 			var topDist:Int = moveVector.x;
 			var bottomDist:Int = moveVector.x;
+			var middleDist:Int = moveVector.x;
 			
 			while ( _scene.isCollision( pos.x + bottomDist, bottom ) && bottomDist < 0 ) {
 				bottomDist++;
@@ -248,13 +270,21 @@ class Game
 				entity.setXSpeed( 0 );
 			}
 			
-			moveVector.x = Math.round( Math.max( bottomDist, topDist ) );
+			while ( _scene.isCollision( pos.x + middleDist, middle ) && middleDist < 0 ) {
+				middleDist++;
+				entity.setXSpeed( 0 );
+			}
+			
+			moveVector.x = Math.round( Math.max( middleDist, Math.max( bottomDist, topDist ) ) );
+		//right
 		} else if ( moveVector.x > 0 ) {
 			var top:Int = pos.y - Math.floor( bound.height );
 			var width:Int = Math.floor( bound.width ) - 1;
 			var bottom:Int = pos.y;
+			var middle:Int = pos.y - Math.floor( bound.height / 2 );
 			var topDist:Int = moveVector.x;
 			var bottomDist:Int = moveVector.x;
+			var middleDist:Int = moveVector.x;
 			
 			while ( _scene.isCollision( pos.x + width + bottomDist, bottom ) && bottomDist > 0 ) {
 				bottomDist--;
@@ -266,7 +296,12 @@ class Game
 				entity.setXSpeed( 0 );
 			}
 			
-			moveVector.x = Math.round( Math.min( bottomDist, topDist ) );
+			while ( _scene.isCollision( pos.x + width + middleDist, middle ) && middleDist > 0 ) {
+				middleDist--;
+				entity.setXSpeed( 0 );
+			}
+			
+			moveVector.x = Math.round( Math.min( middleDist, Math.min( bottomDist, topDist ) ) );
 		}
 		
 		entity.setPosition( pos.x + moveVector.x, pos.y + moveVector.y );
