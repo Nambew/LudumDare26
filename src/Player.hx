@@ -15,8 +15,6 @@ class Player implements PhysicEntity
 	private var _isJumping:Bool;
 	private var _walking:Bool;
 	
-	private var _color:UInt;
-	
 	private var _bitmapData:BitmapData;
 	private var _border:BitmapData;
 	private var _dim:Rectangle;
@@ -26,15 +24,55 @@ class Player implements PhysicEntity
 	private var _ySpeed:Float = 0;
 	private var _jumpSpeed:Float = 6;
 	
+	private var _colorIndex:Int = 12;
+	private var _colors:Array<UInt>;
+	
 	public function new() 
 	{
 		grounded();
 		
 		_dim = new Rectangle(0, 0, 16, 32 );
 		_position = new IntPoint( 0, 0 );
-		_color = 0x777777;
 		
-		_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.floor( _dim.height ), true, _color + 0xFF000000 );
+		_colors = new Array<UInt>();
+		
+		var tpColor:UInt = 0;
+		
+		for ( r in 0...3 ) {
+			for ( g in 0...3 ) {
+				for ( b in 0...3 ) {
+					switch( r ) {
+						case 0:
+							tpColor = 0;
+						case 1:
+							tpColor = 0x770000;
+						case 2:
+							tpColor = 0xFF0000;
+					}
+					
+					switch( g ) {
+						case 1:
+							tpColor += 0x7700;
+						case 2:
+							tpColor += 0xFF00;
+					}
+					
+					switch( b ) {
+						case 1:
+							tpColor += 0x77;
+						case 2:
+							tpColor += 0xFF;
+					}
+					
+					if ( tpColor != 0xFFFFFF && tpColor != 0 ) {
+						_colors.push( tpColor );
+					}
+				}
+			}
+		}
+		
+		
+		_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.floor( _dim.height ), true, getColor() + 0xFF000000 );
 		_border = new BitmapData( Math.floor( _dim.width ), Math.floor( _dim.height ), true, 0 );
 		
 		drawBorder();
@@ -126,64 +164,14 @@ class Player implements PhysicEntity
 		setXSpeed( getXSpeed() + x );
 	}
 	
-	public function addRed():Void {
-		var tmpColor:UInt = _color & 0xFF0000;
-		var newColor:UInt = _color;
-		
-		switch( tmpColor ) {
-			case 0:
-				newColor += 0x770000;
-			case 0x770000:
-				newColor += 0x880000;
-		}
-		
-		if ( newColor != 0xFFFFFF && newColor != 0x000000 ) {
-			updateColor( newColor );
-		}
-		
-		
-	}
-	
-	public function addGreen():Void {
-		var tmpColor:UInt = _color & 0xFF00;
-		var newColor:UInt = _color;
-		
-		switch( tmpColor ) {
-			case 0:
-				newColor += 0x7700;
-			case 0x7700:
-				newColor += 0x8800;
-		}
-		
-		if ( newColor != 0xFFFFFF && newColor != 0x000000 ) {
-			updateColor( newColor );
-		}
-	}
-	
-	public function addBlue():Void {
-		var tmpColor:UInt = _color & 0xFF;
-		var newColor:UInt = _color;
-		
-		switch( tmpColor ) {
-			case 0:
-				newColor += 0x77;
-			case 0x77:
-				newColor += 0x88;
-		}
-		
-		if ( newColor != 0xFFFFFF && newColor != 0x000000 ) {
-			updateColor( newColor );
-		}
-	}
-	
 	public function addColor():Void {
-		
-		
+		_colorIndex = ( _colorIndex + 1 ) % _colors.length;
+		updateColor();
 	}
 	
 	public function removeColor():Void {
-		
-		
+		if ( --_colorIndex  < 0 ) _colorIndex = _colors.length - 1;
+		updateColor();
 	}
 	
 	public function getPosition():IntPoint {
@@ -195,62 +183,12 @@ class Player implements PhysicEntity
 		_position.y = y;
 	}
 	
-	
-	public function removeRed():Void {
-		var tmpColor:UInt = _color & 0xFF0000;
-		var newColor:UInt = _color;
-		
-		switch( tmpColor ) {
-			case 0xFF0000:
-				newColor -= 0x880000;
-			case 0x770000:
-				newColor -= 0x770000;
-		}
-		
-		if ( newColor != 0xFFFFFF && newColor != 0x000000 ) {
-			updateColor( newColor );
-		}
-	}
-	
-	public function removeGreen():Void {
-		var tmpColor:UInt = _color & 0xFF00;
-		var newColor:UInt = _color;
-		
-		switch( tmpColor ) {
-			case 0xFF00:
-				newColor -= 0x8800;
-			case 0x7700:
-				newColor -= 0x7700;
-		}
-		
-		if ( newColor != 0xFFFFFF && newColor != 0x000000 ) {
-			updateColor( newColor );
-		}
-	}
-	
-	public function removeBlue():Void {
-		var tmpColor:UInt = _color & 0xFF;
-		var newColor:UInt = _color;
-		
-		switch( tmpColor ) {
-			case 0xFF:
-				newColor -= 0x88;
-			case 0x77:
-				newColor -= 0x77;
-		}
-		
-		if ( newColor != 0xFFFFFF && newColor != 0x000000 ) {
-			updateColor( newColor );
-		}
-	}
-	
 	public function getColor():UInt {
-		return _color;
+		return _colors[ _colorIndex ];
 	}
 	
-	private function updateColor( newColor:UInt ):Void {
-		_color = newColor;
-		_bitmapData.fillRect( _dim, _color + 0xFF000000 ); 
+	private function updateColor():Void {
+		_bitmapData.fillRect( _dim, getColor() + 0xFF000000 ); 
 		drawBorder();
 	}
 	

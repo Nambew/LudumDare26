@@ -35,6 +35,7 @@ class Game
 	
 	private var _textColor:TextField;
 	private var _textFPS:TextField;
+	private var _textStealth:TextField;
 	private var _stage:Stage;
 	
 	private var _gravity:Float = 0.5;
@@ -84,6 +85,17 @@ class Game
 		_textFPS.text = "FPS:";
 		
 		_stage.addChild( _textFPS );
+		
+		_textStealth = new TextField();
+		_textStealth.textColor = 0;
+		_textStealth.border = true;
+		_textStealth.height = 20;
+		_textStealth.width = 100;
+		_textStealth.x = _stage.width - 100;
+		_textStealth.y = _stage.height - 100;
+		_textStealth.text = "Stealth:";
+		
+		_stage.addChild( _textStealth );
 	}
 	
 	private function isPlayerStealth():Bool {
@@ -121,32 +133,19 @@ class Game
 		}
 		
 		if ( _key.isToggle( Keyboard.A ) ) {
-			
-			_player.addRed();
-			updateText();
-		} else if ( _key.isToggle( Keyboard.Z ) ) {
-			_player.removeRed();
+			_player.addColor();
 			updateText();
 		}
 		
 		if ( _key.isToggle( Keyboard.S ) ) {
-			_player.addGreen();
-			updateText();
-		} else if ( _key.isToggle( Keyboard.X ) ) {
-			_player.removeGreen();
-			updateText();
-		}
-		
-		if ( _key.isToggle( Keyboard.D ) ) {
-			_player.addBlue();
-			updateText();
-		} else if ( _key.isToggle( Keyboard.C ) ) {
-			_player.removeBlue();
+			_player.removeColor();
 			updateText();
 		}
 		
 		if ( isPlayerStealth() ) {
-			
+			_textStealth.text = "Stealth: YES"; 
+		} else {
+			_textStealth.text = "Stealth: NO"; 
 		}
 		
 		resolvePhysic();
