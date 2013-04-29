@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="80" height="30" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="mapsheet" tilewidth="16" tileheight="16">
+  <image source="../gimp/mapsheet.png" width="160" height="160"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="80" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztmetuwjAMhdNpY9DxEuP9HxIhtZKxbMe3XAr8OBKiTRx/tk+pWEopy0chfRk16iyZ+12QevIbqe9N0Zwwv0ugVqOZePhBefap8aO0TsI1Em80v1WRhyW3XmuOzm9JWGddfxR+2pinTY/Pt03UfWcgT25Sz2r4aWvyTvy4/rsCReYiwg9ygddm5ref/UpI24vW/qnxq+3L8WvxTNful8FPOhu+x8IP703x87CJMoNrIvPrlXZ+I34S5ZQ991h/QNF61/zPky/1/WhmrflJ+VhzHsGkFz/MAPL7B6LW/gJp4kRybOUfEX5UXIkfvtfCb2Z5+HF123+rcf0H64v5zTyn0rk4ftwaqe9r/KB2dqP9vye/mm9Y+WmZed71PXWx+mS2IL9Mz6b4rYw0HCzMenKm3lU97PB1Kz8prlSnE6Fe/iDx8+zF9R9kIfHzaBZ+Vt+heiYyv6/Az7sHJS2/Vr6kPafX47X8vDG5/xpfjV9GDCqepv9ascvMTcsvW738L8PDNPx+yrO39uDHnemI/Nby/A7QenbeQXeA2xi0
+  </data>
+ </layer>
+</map>

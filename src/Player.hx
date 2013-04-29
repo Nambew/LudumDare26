@@ -56,10 +56,11 @@ class Player implements PhysicEntity
 	
 	public function reset():Void {
 		_colorIndex = 0;
+		
 		_xSpeed = 0;
 		_ySpeed = 0;
-		_jumpSpeed = 0;
 		_walking = false;
+		updateColor();
 		
 		grounded();
 	}

@@ -17,11 +17,11 @@ class Level1 implements Level
 	}
 	
 	public function getPlayerPosition():IntPoint {
-		return new IntPoint( 20, 120 );
+		return new IntPoint( 2 * 16, 9 * 16 - 1 );
 	}
 	
 	public function getGoal():Rectangle {
-		return new Rectangle( 6 * 16, 25 * 16, 32, 32 );
+		return new Rectangle( 16 * 16, 7 * 16, 32, 32 );
 	}
 	
 	public function getBackground():BitmapData {
@@ -31,9 +31,7 @@ class Level1 implements Level
 	public function getEnemies():Array<EnemyData> {
 		var enemies:Array<EnemyData> = new Array<EnemyData>();
 		
-		enemies.push( new EnemyData( new IntPoint( 464, 111 ), new IntPoint( 20 * 16, 9 * 16 ) ) );
-		enemies.push( new EnemyData( new IntPoint( 53 * 16, 7 * 16 ), new IntPoint( 53 * 16, 7 * 16 ) ) );
-		enemies.push( new EnemyData( new IntPoint( 49 * 16, 13 * 16 ), new IntPoint( 49 * 16, 13 * 16 ) ) );
+		enemies.push( new EnemyData( new IntPoint( 5 * 16, 5 * 16 ), new IntPoint( 5 * 16, 5 * 16 ) ) );
 		
 		return enemies;
 	}

@@ -52,7 +52,8 @@ class Game
 	private var _goal:Rectangle;
 	private var _contener:Sprite;
 	private var _screen:Sprite;
-	private var _level:Level;
+	private var _currentLevel:Level;
+	private var _levels:Array<Level>;
 	
 	public function new( stage:Stage ) 
 	{
@@ -62,8 +63,12 @@ class Game
 		_stage.addChild( _contener );
 		_stage.addChild( _screen );
 		
+		_levels = new Array<Level>();
+		_levels.push( new Level1() );
+		_levels.push( new Level2() );
+		_levels.push( new Level3() );
 		
-		_level = new Level1();
+		_currentLevel = _levels.shift();
 		
 		_key = new KeyboardRegistry( _stage );
 		
@@ -73,16 +78,14 @@ class Game
 		
 		_enemies = new Array<Enemy>();
 		
-		
-		
 		_scene = new Scene( 600, 400 );
-		_scene.setBackground( _level.getBackground() );
+		
 		_scene.setPlayer( _player );
 		
 		_physicEntites = new Array<PhysicEntity>();
 		
 		_contener.addChild( _scene );
-		_goal = _level.getGoal();
+		
 		#if debugmode
 			_textColor = new TextField();
 			_textColor.textColor = 0;
@@ -141,22 +144,32 @@ class Game
 		_key.deactivate();
 		
 		if ( success ) {
-			showSuccess();
+			if ( _levels.length == 0 ) {
+				showSuccess();
+			} else {
+				_currentLevel = _levels.shift();
+				start();
+			}
+			
 		} else {
 			showGameOver();
 		}
 	}
 	
 	private function reset():Void {
-		_player.setPosition( _level.getPlayerPosition().x, _level.getPlayerPosition().y );
+		_scene.setBackground( _currentLevel.getBackground() );
+		_player.setPosition( _currentLevel.getPlayerPosition().x, _currentLevel.getPlayerPosition().y );
 		_scene.reset();
+		_player.reset();
+		
+		_goal = _currentLevel.getGoal();
 		
 		_physicEntites = new Array<PhysicEntity>();
 		_enemies = new Array<Enemy>();
 		
 		_physicEntites.push( _player );
 		
-		for ( enemyData in _level.getEnemies() ) {
+		for ( enemyData in _currentLevel.getEnemies() ) {
 			_enemies.push( new Enemy( enemyData.start.clone(), _scene, enemyData.end.clone() ) );
 		}
 		

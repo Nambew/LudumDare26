@@ -7,7 +7,7 @@ import flash.geom.Rectangle;
  * ...
  * @author andre
  */
-class Enemy implements PhysicEntity
+class Ennemy implements PhysicEntity
 {
 	private static var _bitmapData:BitmapData;
 	
@@ -34,7 +34,6 @@ class Enemy implements PhysicEntity
 	
 	private var _scene:Scene;
 	
-	
 	public function new( startPos:IntPoint, scene:Scene, endPos:IntPoint ) 
 	{
 		_collision = new IntPoint(0, 0);
@@ -45,7 +44,7 @@ class Enemy implements PhysicEntity
 		
 		_position = startPos;
 		_active = false;
-		_dim = new Rectangle( 0, 0, 28, 26 );
+		_dim = new Rectangle( 0, 0, 32, 26 );
 		_pursuitMode = false;
 	}
 	
@@ -60,9 +59,9 @@ class Enemy implements PhysicEntity
 	private function draw():Void {
 		if( _bitmapData == null ) {
 			_bitmapData = new BitmapData( Math.floor( _dim.width ), Math.round(_dim.height ), true, 0x00000000 );
-			_bitmapData.fillRect( new Rectangle(0, 0, _dim.width, 10 ), 0xFF999999 );
-			_bitmapData.fillRect( new Rectangle(5, 10, 18, 14 ), 0xFF999999 );
-			_bitmapData.fillRect( new Rectangle(0, 14, _dim.width, 10 ), 0xFF999999 );
+			_bitmapData.fillRect( new Rectangle(0, 0, 32, 10 ), 0xFF999999 );
+			_bitmapData.fillRect( new Rectangle(8, 10, 16, 14 ), 0xFF999999 );
+			_bitmapData.fillRect( new Rectangle(0, 14, 32, 10 ), 0xFF999999 );
 		}
 	}
 	
@@ -103,7 +102,7 @@ class Enemy implements PhysicEntity
 				_xSpeed = 0;
 			}
 			
-			if ( _collision.x != 0 && playerPos.y < _position.y ) {
+			if ( _collision.x != 0 && playerPos.y < _position.y && isGrounded() ) {
 				this.jump();
 			}
 		} else {
@@ -112,30 +111,30 @@ class Enemy implements PhysicEntity
 			} else {
 				var dist:Float =  Math.sqrt( Math.pow( _position.x - _targetPos.x, 2 ) + Math.pow( _position.y - _targetPos.y, 2 ) );
 				
-				if ( dist <= 5  ) {
-					_waitTime = 50;
-					_xSpeed = 0;
-					_ySpeed = 0;
-					
-					if( !_startPos.equal( _endPos ) ) {
+				if( !isFalling()) { 
+					if ( dist <= 5 ) {
+						_waitTime = 50;
+						_xSpeed = 0;
+						_ySpeed = 0;
+						
 						if ( _targetPos.equal( _startPos ) ) {
 							_targetPos = _endPos.clone();
 						} else {
 							_targetPos = _startPos.clone();
 						}
-					}
-					
-				} else {
-					if ( _position.x > _targetPos.x ) {
-						setXSpeed( _xSpeed - 1 );
-					} else if ( _position.x < _targetPos.x ) {
-						setXSpeed( _xSpeed + 1 );
+						
 					} else {
-						_xSpeed = 0;
-					}
-					
-					if ( _collision.x != 0 && _targetPos.y < _position.y ) {
-						this.jump();
+						if ( _position.x > _targetPos.x ) {
+							setXSpeed( _xSpeed - 1 );
+						} else if ( _position.x < _targetPos.x ) {
+							setXSpeed( _xSpeed + 1 );
+						} else {
+							_xSpeed = 0;
+						}
+						
+						if ( _collision.x != 0 && _targetPos.y < _position.y ) {
+							this.jump();
+						}
 					}
 				}
 				
